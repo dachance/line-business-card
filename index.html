@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>神利商城電子名片</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .logo img {
+            width: 100%;
+        }
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background: #00C300;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #00A300;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        .btn-alt {
+            background: transparent;
+            border: 2px solid white;
+        }
+        .error {
+            color: #FF6B6B;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://i.imgur.com/5Dis7CF.jpg" alt="神利商城">
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <h1>電子名片分享中...</h1>
+            <p>請稍候，名片將自動出現在聊天室</p>
+        </div>
+        
+        <div id="manualShare" style="display:none;">
+            <h1>點擊分享電子名片</h1>
+            <p>請手動將電子名片發送到聊天室</p>
+            <button class="btn" id="shareBtn">📤 立即分享名片</button>
+            <button class="btn btn-alt" onclick="liff.closeWindow()">❌ 關閉頁面</button>
+        </div>
+        
+        <div class="error" id="errorMsg"></div>
+    </div>
+
+    <script>
+        // 完整的Flex Message數據
+        const flexMessage = {
+            "type": "bubble",
+            "hero": {
+                "type": "video",
+                "url": "https://voom-obs.line-scdn.net/r/myhome/hex/cj03aDZidnFjNmNiMTJzJnM9anA3JnQ9ZCZ1PTFoamphdWloczQ0ZzAmaT0w/mp4",
+                "previewUrl": "https://voom-obs.line-scdn.net/r/myhome/hex/cj03dHRmM3Q2YzZtaTZpJnM9anA3JnQ9ZCZ1PTFoamo5Y3ZuNDRuMDAmaT0w/L1080x1920",
+                "altContent": {
+                    "type": "image",
+                    "size": "full",
+                    "aspectRatio": "1280:720",
+                    "aspectMode": "cover",
+                    "url": "https://voom-obs.line-scdn.net/r/myhome/hex/cj03dHRmM3Q2YzZtaTZpJnM9anA3JnQ9ZCZ1PTFoamo5Y3ZuNDRuMDAmaT0w/L1080x1920"
+                },
+                "aspectRatio": "1280:720",
+                "action": {
+                    "type": "uri",
+                    "label": "神利商城",
+                    "uri": "https://joaily.com"
+                }
+            },
+            "body": {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                    {
+                        "type": "image",
+                        "url": "https://i.imgur.com/aEceA4j.png",
+                        "action": {
+                            "type": "uri",
+                            "label": "action",
+                            "uri": "tel:0916978486"
+                        }
+                    },
+                    {
+                        "type": "image",
+                        "url": "https://i.imgur.com/ysxEm4y.png",
+                        "size": "xxs",
+                        "align": "center",
+                        "gravity": "center",
+                        "margin": "none",
+                        "action": {
+                            "type": "uri",
+                            "label": "Line",
+                            "uri": "https://line.me/ti/p/XOX6dKMjpP"
+                        }
+                    },
+                    {
+                        "type": "image",
+                        "url": "https://i.imgur.com/mcxrS5s.png",
+                        "margin": "none",
+                        "size": "xxs",
+                        "align": "center",
+                        "gravity": "center",
+                        "action": {
+                            "type": "uri",
+                            "label": "Facebook",
+                            "uri": "https://www.facebook.com/groups/FANCYBOOK"
+                        }
+                    },
+                    {
+                        "type": "image",
+                        "url": "https://i.imgur.com/9EoQlR2.png",
+                        "size": "xxs",
+                        "align": "center",
+                        "gravity": "center",
+                        "action": {
+                            "type": "uri",
+                            "label": "TikTok",
+                            "uri": "https://www.tiktok.com/@joaily"
+                        }
+                    },
+                    {
+                        "type": "image",
+                        "url": "https://i.imgur.com/yvQxe83.png",
+                        "size": "xxs",
+                        "align": "center",
+                        "action": {
+                            "type": "uri",
+                            "label": "E-mail",
+                            "uri": "mailto:joailyboss@gmail.com"
+                        }
+                    },
+                    {
+                        "type": "image",
+                        "url": "https://i.imgur.com/ljZJenG.png",
+                        "size": "xxs",
+                        "action": {
+                            "type": "uri",
+                            "label": "youtube",
+                            "uri": "https://www.youtube.com/@Joaily/videos"
+                        }
+                    },
+                    {
+                        "type": "image",
+                        "url": "https://i.imgur.com/FFVdeA6.png",
+                        "size": "xxs",
+                        "align": "center",
+                        "action": {
+                            "type": "uri",
+                            "label": "map",
+                            "uri": "https://www.google.com/maps/place/100%E5%8F%B0%E5%8C%97%E5%B8%82%E4%B8%AD%E6%AD%A3%E5%8D%80%E7%BE%85%E6%96%AF%E7%A6%8F%E8%B7%AF%E4%B8%89%E6%AE%B5281%E8%99%9F6%E6%A8%93/@25.0179748,121.5287351,17z/data=!3m1!4b1!4m6!3m5!1s0x3442a98bff5e88f9:0xa8e1ffabe855f918!8m2!3d25.01797!4d121.53131!16s%2Fg%2F11n0fqlm5q?authuser=0"
+                        }
+                    },
+                    {
+                        "type": "image",
+                        "url": "https://i.imgur.com/LpTsI41.png",
+                        "size": "xxs",
+                        "action": {
+                            "type": "uri",
+                            "label": "share",
+                            "uri": "https://lihi3.cc/16B8R"
+                        }
+                    }
+                ],
+                "paddingAll": "0px"
+            },
+            "footer": {
+                "type": "box",
+                "layout": "vertical",
+                "spacing": "sm",
+                "contents": [
+                    {
+                        "type": "image",
+                        "url": "https://i.imgur.com/5Dis7CF.jpg",
+                        "action": {
+                            "type": "uri",
+                            "label": "神利霸流",
+                            "uri": "https://lin.ee/vwTZGsa"
+                        }
+                    },
+                    {
+                        "type": "text",
+                        "text": "掃碼拿好康、註冊賺紅利",
+                        "align": "center"
+                    },
+                    {
+                        "type": "button",
+                        "action": {
+                            "type": "uri",
+                            "label": "🔊 聽語音自我介紹",
+                            "uri": "https://podcasts.apple.com/tw/podcast/s1ep4-%E6%AD%8C%E6%89%8B%E8%AE%8A%E6%88%90%E8%81%9A%E6%9C%83%E6%95%91%E6%98%9F-%E4%BD%BF%E5%91%BD%E6%84%9F%E8%AE%93%E5%A5%B9%E4%B8%8D%E4%B8%80%E6%A8%A3-%E5%BE%9E%E5%8F%B3%E8%80%B3%E8%81%BD%E4%B8%8D%E8%A6%8B%E5%88%B0%E9%87%91%E6%9B%B2%E5%85%AD%E5%BA%A6%E5%85%A5%E5%9C%8D-ft-%E5%BC%B5%E6%B6%B5%E9%9B%85/id1822120421?i=1000717138629"
+                        },
+                        "style": "secondary"
+                    },
+                    {
+                        "type": "button",
+                        "style": "primary",
+                        "color": "#00B900",
+                        "action": {
+                            "type": "uri",
+                            "label": "📤 收藏名片",
+                            "uri": "https://line.me/R/oaMessage/@981zamfj/?%E6%B6%82%E6%9D%90%E5%BE%B7%E7%9A%84%E5%90%8D%E7%89%87%20%F0%9F%93%87%0A%0A%E5%A7%93%E5%90%8D%EF%BC%9A%E6%B6%82%E6%9D%90%E5%BE%B7%0A%E9%9B%BB%E8%A9%B1%EF%BC%9A0916-978-486%0ALINE%20ID%EF%BC%9A0921296393%0AE-mail%EF%BC%9Ajoailyboss%40gmail.com%0A%E5%9C%B0%E5%9D%80%EF%BC%9A%E5%8F%B0%E5%8C%97%E5%B8%82%E4%B8%AD%E6%AD%A3%E5%8D%80%E7%BE%85%E6%96%AF%E7%A6%8F%E8%B7%AF281%E8%99%9F6%E6%A8%93%0A%E5%85%AC%E5%8F%B8%EF%BC%9A%E7%A5%9E%E5%88%A9%E6%99%BA%E5%AA%92%E5%95%86%E7%9B%9F%0A%E5%8F%A3%E8%AA%9E%EF%BC%9A%E4%BD%A0%E6%B6%88%E8%B2%BB%E6%88%91%E4%BB%98%E9%8C%A2%EF%BC%8C%E4%BD%A0%E8%AB%8B%E5%AE%A2%E6%88%91%E8%B2%B7%E5%96%AE%EF%BC%8C%E4%BD%A0%E5%89%B5%E6%A5%AD%E6%88%91%E6%8A%95%E8%B3%87%0A%0A%F0%9F%94%97%20%E9%BB%9E%E9%80%99%E8%A3%A1%E5%88%86%E4%BA%AB%E5%90%8D%E7%89%87%EF%BC%9Ahttps%3A%2F%2Flihi3.cc%2F16B8R"
+                        },
+                        "height": "sm"
+                    },
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "contents": [],
+                        "spacing": "sm",
+                        "position": "absolute"
+                    },
+                    {
+                        "type": "button",
+                        "action": {
+                            "type": "uri",
+                            "label": "會員申請",
+                            "uri": "https://liff.line.me/2007768335-ZoeRBl5V"
+                        },
+                        "color": "#0000E3",
+                        "style": "primary",
+                        "height": "sm",
+                        "margin": "xs"
+                    },
+                    {
+                        "type": "button",
+                        "action": {
+                            "type": "uri",
+                            "label": "直接註冊",
+                            "uri": "https://liff.line.me/2007768335-JE1kZMDV"
+                        },
+                        "style": "primary",
+                        "height": "sm",
+                        "color": "#5B00AE"
+                    },
+                    {
+                        "type": "text",
+                        "text": "技術支持：神利智媒體聯盟行銷平台",
+                        "color": "#0000FF",
+                        "align": "center",
+                        "size": "xxs",
+                        "action": {
+                            "type": "uri",
+                            "label": "推薦",
+                            "uri": "http://linecorp.com/",
+                            "altUri": {
+                                "desktop": "https://joaily.com/?ref=joaily"
+                            }
+                        }
+                    }
+                ]
+            }
+        };
+
+        // 初始化LIFF應用
+        async function initializeLiff() {
+            try {
+                // 使用您的LIFF ID替換這裡
+                await liff.init({ liffId: "YOUR_LIFF_ID" });
+                
+                // 檢查是否在LINE環境中
+                if (!liff.isInClient()) {
+                    showError("請在LINE應用程式中打開此頁面");
+                    return;
+                }
+                
+                // 確保用戶已登錄
+                if (!liff.isLoggedIn()) {
+                    liff.login();
+                    return;
+                }
+                
+                // 嘗試自動分享
+                await shareBusinessCard();
+                
+            } catch (error) {
+                console.error('LIFF初始化失敗:', error);
+                showError(`技術錯誤: ${error.message}`);
+                document.getElementById('manualShare').style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // 分享電子名片
+        async function shareBusinessCard() {
+            try {
+                // 使用shareTargetPicker分享
+                const result = await liff.shareTargetPicker([
+                    {
+                        "type": "flex",
+                        "altText": "神利商城電子名片",
+                        "contents": flexMessage
+                    }
+                ]);
+                
+                if (result) {
+                    // 分享成功後關閉窗口
+                    liff.closeWindow();
+                } else {
+                    // 用戶取消分享
+                    document.getElementById('manualShare').style.display = 'block';
+                    document.getElementById('loading').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('分享失敗:', error);
+                
+                // 處理特定錯誤代碼
+                if (error.code === 'UNAUTHORIZED') {
+                    showError("需要LINE登錄權限");
+                } else if (error.code === 'INVALID_ARGUMENT') {
+                    showError("名片格式錯誤，請聯繫技術支持");
+                } else {
+                    showError(`分享失敗: ${error.message}`);
+                }
+                
+                document.getElementById('manualShare').style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // 顯示錯誤信息
+        function showError(message) {
+            const errorElement = document.getElementById('errorMsg');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        // 頁面加載時初始化
+        window.onload = () => {
+            // 綁定手動分享按鈕
+            document.getElementById('shareBtn').addEventListener('click', shareBusinessCard);
+            
+            // 初始化LIFF
+            initializeLiff();
+        };
+    </script>
+</body>
+</html>
