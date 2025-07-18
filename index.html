@@ -328,8 +328,11 @@
         // 初始化LIFF應用
         async function initializeLiff() {
             try {
-                // 使用您的LIFF ID替換這裡
-                await liff.init({ liffId: "2007768335-OMD1xljm" });
+                // 使用您的LIFF ID（2007768335-OMD1xljm）
+                await liff.init({ 
+                    liffId: "2007768335-OMD1xljm",
+                    withLoginOnExternalBrowser: true
+                });
                 
                 // 檢查是否在LINE環境中
                 if (!liff.isInClient()) {
@@ -377,15 +380,17 @@
             } catch (error) {
                 console.error('分享失敗:', error);
                 
-                // 處理特定錯誤代碼
-                if (error.code === 'UNAUTHORIZED') {
-                    showError("需要LINE登錄權限");
-                } else if (error.code === 'INVALID_ARGUMENT') {
-                    showError("名片格式錯誤，請聯繫技術支持");
+                // 顯示具體錯誤信息
+                let errorMessage = "分享失敗";
+                if (error.code === "UNAUTHORIZED") {
+                    errorMessage = "未授權：請允許LINE發送消息";
+                } else if (error.code === "INVALID_ARGUMENT") {
+                    errorMessage = "名片格式錯誤";
                 } else {
-                    showError(`分享失敗: ${error.message}`);
+                    errorMessage = error.message;
                 }
                 
+                showError(errorMessage);
                 document.getElementById('manualShare').style.display = 'block';
                 document.getElementById('loading').style.display = 'none';
             }
