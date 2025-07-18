@@ -1,56 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>神利商城電子名片</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --button-color: #00C300;
+            --error-color: #FF6B6B;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            font-family: 'Helvetica Neue', 'Microsoft JhengHei', Arial, sans-serif;
+            background: var(--primary-gradient);
             color: white;
-            text-align: center;
-            padding: 20px;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
+        
         .container {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 30px;
             max-width: 500px;
-            width: 90%;
+            width: 100%;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            text-align: center;
         }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
+        
         .logo {
             width: 120px;
             height: 120px;
             margin: 0 auto 20px;
             border-radius: 50%;
             background: white;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
         }
+        
         .logo img {
             width: 100%;
+            display: block;
         }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        p {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
         .loading {
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding: 20px 0;
         }
+        
         .spinner {
             width: 50px;
             height: 50px;
@@ -60,40 +84,66 @@
             animation: spin 1s ease-in-out infinite;
             margin-bottom: 20px;
         }
+        
         .btn {
-            background: #00C300;
+            background: var(--button-color);
             color: white;
             border: none;
             border-radius: 30px;
             padding: 15px 30px;
             font-size: 18px;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 10px 0;
             cursor: pointer;
             width: 100%;
             max-width: 300px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: all 0.3s;
+            display: inline-block;
         }
+        
         .btn:hover {
             background: #00A300;
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
         }
+        
         .btn-alt {
             background: transparent;
             border: 2px solid white;
         }
+        
         .error {
-            color: #FF6B6B;
+            color: var(--error-color);
             background: rgba(0, 0, 0, 0.3);
             padding: 15px;
             border-radius: 10px;
             margin-top: 20px;
             display: none;
         }
+        
+        .hidden {
+            display: none;
+        }
+        
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
         }
     </style>
 </head>
@@ -103,24 +153,24 @@
             <img src="https://i.imgur.com/5Dis7CF.jpg" alt="神利商城">
         </div>
         
-        <div class="loading" id="loading">
+        <div id="loading" class="loading">
             <div class="spinner"></div>
             <h1>電子名片分享中...</h1>
             <p>請稍候，名片將自動出現在聊天室</p>
         </div>
         
-        <div id="manualShare" style="display:none;">
+        <div id="manualShare" class="hidden">
             <h1>點擊分享電子名片</h1>
             <p>請手動將電子名片發送到聊天室</p>
             <button class="btn" id="shareBtn">📤 立即分享名片</button>
-            <button class="btn btn-alt" onclick="liff.closeWindow()">❌ 關閉頁面</button>
+            <button class="btn btn-alt" id="closeBtn">❌ 關閉頁面</button>
         </div>
         
-        <div class="error" id="errorMsg"></div>
+        <div id="errorMsg" class="error"></div>
     </div>
 
     <script>
-        // 完整的Flex Message數據
+        // 修正后的Flex Message數據
         const flexMessage = {
             "type": "bubble",
             "hero": {
@@ -148,94 +198,60 @@
                     {
                         "type": "image",
                         "url": "https://i.imgur.com/aEceA4j.png",
+                        "aspectMode": "cover",
+                        "size": "40px",
                         "action": {
                             "type": "uri",
-                            "label": "action",
                             "uri": "tel:0916978486"
                         }
                     },
                     {
                         "type": "image",
                         "url": "https://i.imgur.com/ysxEm4y.png",
-                        "size": "xxs",
-                        "align": "center",
-                        "gravity": "center",
-                        "margin": "none",
+                        "size": "40px",
                         "action": {
                             "type": "uri",
-                            "label": "Line",
                             "uri": "https://line.me/ti/p/XOX6dKMjpP"
                         }
                     },
                     {
                         "type": "image",
                         "url": "https://i.imgur.com/mcxrS5s.png",
-                        "margin": "none",
-                        "size": "xxs",
-                        "align": "center",
-                        "gravity": "center",
+                        "size": "40px",
                         "action": {
                             "type": "uri",
-                            "label": "Facebook",
                             "uri": "https://www.facebook.com/groups/FANCYBOOK"
                         }
                     },
                     {
                         "type": "image",
                         "url": "https://i.imgur.com/9EoQlR2.png",
-                        "size": "xxs",
-                        "align": "center",
-                        "gravity": "center",
+                        "size": "40px",
                         "action": {
                             "type": "uri",
-                            "label": "TikTok",
                             "uri": "https://www.tiktok.com/@joaily"
                         }
                     },
                     {
                         "type": "image",
                         "url": "https://i.imgur.com/yvQxe83.png",
-                        "size": "xxs",
-                        "align": "center",
+                        "size": "40px",
                         "action": {
                             "type": "uri",
-                            "label": "E-mail",
                             "uri": "mailto:joailyboss@gmail.com"
                         }
                     },
                     {
                         "type": "image",
                         "url": "https://i.imgur.com/ljZJenG.png",
-                        "size": "xxs",
+                        "size": "40px",
                         "action": {
                             "type": "uri",
-                            "label": "youtube",
                             "uri": "https://www.youtube.com/@Joaily/videos"
-                        }
-                    },
-                    {
-                        "type": "image",
-                        "url": "https://i.imgur.com/FFVdeA6.png",
-                        "size": "xxs",
-                        "align": "center",
-                        "action": {
-                            "type": "uri",
-                            "label": "map",
-                            "uri": "https://www.google.com/maps/place/100%E5%8F%B0%E5%8C%97%E5%B8%82%E4%B8%AD%E6%AD%A3%E5%8D%80%E7%BE%85%E6%96%AF%E7%A6%8F%E8%B7%AF%E4%B8%89%E6%AE%B5281%E8%99%9F6%E6%A8%93/@25.0179748,121.5287351,17z/data=!3m1!4b1!4m6!3m5!1s0x3442a98bff5e88f9:0xa8e1ffabe855f918!8m2!3d25.01797!4d121.53131!16s%2Fg%2F11n0fqlm5q?authuser=0"
-                        }
-                    },
-                    {
-                        "type": "image",
-                        "url": "https://i.imgur.com/LpTsI41.png",
-                        "size": "xxs",
-                        "action": {
-                            "type": "uri",
-                            "label": "share",
-                            "uri": "https://lihi3.cc/16B8R"
                         }
                     }
                 ],
-                "paddingAll": "0px"
+                "paddingAll": "10px"
             },
             "footer": {
                 "type": "box",
@@ -245,16 +261,18 @@
                     {
                         "type": "image",
                         "url": "https://i.imgur.com/5Dis7CF.jpg",
+                        "size": "full",
+                        "aspectMode": "cover",
                         "action": {
                             "type": "uri",
-                            "label": "神利霸流",
                             "uri": "https://lin.ee/vwTZGsa"
                         }
                     },
                     {
                         "type": "text",
                         "text": "掃碼拿好康、註冊賺紅利",
-                        "align": "center"
+                        "align": "center",
+                        "margin": "md"
                     },
                     {
                         "type": "button",
@@ -263,25 +281,19 @@
                             "label": "🔊 聽語音自我介紹",
                             "uri": "https://podcasts.apple.com/tw/podcast/s1ep4-%E6%AD%8C%E6%89%8B%E8%AE%8A%E6%88%90%E8%81%9A%E6%9C%83%E6%95%91%E6%98%9F-%E4%BD%BF%E5%91%BD%E6%84%9F%E8%AE%93%E5%A5%B9%E4%B8%8D%E4%B8%80%E6%A8%A3-%E5%BE%9E%E5%8F%B3%E8%80%B3%E8%81%BD%E4%B8%8D%E8%A6%8B%E5%88%B0%E9%87%91%E6%9B%B2%E5%85%AD%E5%BA%A6%E5%85%A5%E5%9C%8D-ft-%E5%BC%B5%E6%B6%B5%E9%9B%85/id1822120421?i=1000717138629"
                         },
-                        "style": "secondary"
+                        "style": "secondary",
+                        "margin": "md"
                     },
                     {
                         "type": "button",
-                        "style": "primary",
-                        "color": "#00B900",
                         "action": {
                             "type": "uri",
                             "label": "📤 收藏名片",
                             "uri": "https://line.me/R/oaMessage/@981zamfj/?%E6%B6%82%E6%9D%90%E5%BE%B7%E7%9A%84%E5%90%8D%E7%89%87%20%F0%9F%93%87%0A%0A%E5%A7%93%E5%90%8D%EF%BC%9A%E6%B6%82%E6%9D%90%E5%BE%B7%0A%E9%9B%BB%E8%A9%B1%EF%BC%9A0916-978-486%0ALINE%20ID%EF%BC%9A0921296393%0AE-mail%EF%BC%9Ajoailyboss%40gmail.com%0A%E5%9C%B0%E5%9D%80%EF%BC%9A%E5%8F%B0%E5%8C%97%E5%B8%82%E4%B8%AD%E6%AD%A3%E5%8D%80%E7%BE%85%E6%96%AF%E7%A6%8F%E8%B7%AF281%E8%99%9F6%E6%A8%93%0A%E5%85%AC%E5%8F%B8%EF%BC%9A%E7%A5%9E%E5%88%A9%E6%99%BA%E5%AA%92%E5%95%86%E7%9B%9F%0A%E5%8F%A3%E8%AA%9E%EF%BC%9A%E4%BD%A0%E6%B6%88%E8%B2%BB%E6%88%91%E4%BB%98%E9%8C%A2%EF%BC%8C%E4%BD%A0%E8%AB%8B%E5%AE%A2%E6%88%91%E8%B2%B7%E5%96%AE%EF%BC%8C%E4%BD%A0%E5%89%B5%E6%A5%AD%E6%88%91%E6%8A%95%E8%B3%87%0A%0A%F0%9F%94%97%20%E9%BB%9E%E9%80%99%E8%A3%A1%E5%88%86%E4%BA%AB%E5%90%8D%E7%89%87%EF%BC%9Ahttps%3A%2F%2Flihi3.cc%2F16B8R"
                         },
+                        "style": "primary",
+                        "color": "#00B900",
                         "height": "sm"
-                    },
-                    {
-                        "type": "box",
-                        "layout": "horizontal",
-                        "contents": [],
-                        "spacing": "sm",
-                        "position": "absolute"
                     },
                     {
                         "type": "button",
@@ -293,7 +305,7 @@
                         "color": "#0000E3",
                         "style": "primary",
                         "height": "sm",
-                        "margin": "xs"
+                        "margin": "sm"
                     },
                     {
                         "type": "button",
@@ -304,7 +316,8 @@
                         },
                         "style": "primary",
                         "height": "sm",
-                        "color": "#5B00AE"
+                        "color": "#5B00AE",
+                        "margin": "sm"
                     },
                     {
                         "type": "text",
@@ -312,27 +325,47 @@
                         "color": "#0000FF",
                         "align": "center",
                         "size": "xxs",
+                        "margin": "lg",
                         "action": {
                             "type": "uri",
-                            "label": "推薦",
-                            "uri": "http://linecorp.com/",
-                            "altUri": {
-                                "desktop": "https://joaily.com/?ref=joaily"
-                            }
+                            "uri": "https://joaily.com/?ref=joaily"
                         }
                     }
                 ]
             }
         };
 
+        // DOM元素
+        const loadingElement = document.getElementById('loading');
+        const manualShareElement = document.getElementById('manualShare');
+        const errorElement = document.getElementById('errorMsg');
+        const shareBtn = document.getElementById('shareBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        
+        // 顯示/隱藏元素
+        function showElement(element) {
+            element.classList.remove('hidden');
+        }
+        
+        function hideElement(element) {
+            element.classList.add('hidden');
+        }
+        
+        // 顯示錯誤信息
+        function showError(message) {
+            errorElement.textContent = message;
+            showElement(errorElement);
+        }
+        
         // 初始化LIFF應用
         async function initializeLiff() {
             try {
-                // 使用您的LIFF ID（2007768335-OMD1xljm）
+                // 使用您的LIFF ID
                 await liff.init({ 
-                    liffId: "2007768335-OMD1xljm",
-                    withLoginOnExternalBrowser: true
+                    liffId: "2007768335-OMD1xljm"
                 });
+                
+                console.log("LIFF初始化成功");
                 
                 // 檢查是否在LINE環境中
                 if (!liff.isInClient()) {
@@ -352,8 +385,8 @@
             } catch (error) {
                 console.error('LIFF初始化失敗:', error);
                 showError(`技術錯誤: ${error.message}`);
-                document.getElementById('manualShare').style.display = 'block';
-                document.getElementById('loading').style.display = 'none';
+                showElement(manualShareElement);
+                hideElement(loadingElement);
             }
         }
 
@@ -370,47 +403,48 @@
                 ]);
                 
                 if (result) {
+                    console.log("分享成功");
                     // 分享成功後關閉窗口
                     liff.closeWindow();
                 } else {
-                    // 用戶取消分享
-                    document.getElementById('manualShare').style.display = 'block';
-                    document.getElementById('loading').style.display = 'none';
+                    console.log("用戶取消分享");
+                    showElement(manualShareElement);
+                    hideElement(loadingElement);
                 }
             } catch (error) {
                 console.error('分享失敗:', error);
                 
                 // 顯示具體錯誤信息
-                let errorMessage = "分享失敗";
-                if (error.code === "UNAUTHORIZED") {
-                    errorMessage = "未授權：請允許LINE發送消息";
-                } else if (error.code === "INVALID_ARGUMENT") {
-                    errorMessage = "名片格式錯誤";
+                let errorMessage = "分享失敗: ";
+                if (error.message) {
+                    errorMessage += error.message;
                 } else {
-                    errorMessage = error.message;
+                    errorMessage += "未知錯誤";
                 }
                 
                 showError(errorMessage);
-                document.getElementById('manualShare').style.display = 'block';
-                document.getElementById('loading').style.display = 'none';
+                showElement(manualShareElement);
+                hideElement(loadingElement);
             }
         }
 
-        // 顯示錯誤信息
-        function showError(message) {
-            const errorElement = document.getElementById('errorMsg');
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
-        }
-
         // 頁面加載時初始化
-        window.onload = () => {
+        window.addEventListener('DOMContentLoaded', () => {
             // 綁定手動分享按鈕
-            document.getElementById('shareBtn').addEventListener('click', shareBusinessCard);
+            shareBtn.addEventListener('click', shareBusinessCard);
+            
+            // 綁定關閉按鈕
+            closeBtn.addEventListener('click', () => {
+                if (liff.isInClient()) {
+                    liff.closeWindow();
+                } else {
+                    alert("請在LINE應用中關閉此頁面");
+                }
+            });
             
             // 初始化LIFF
             initializeLiff();
-        };
+        });
     </script>
 </body>
 </html>
